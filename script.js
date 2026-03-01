@@ -1,11 +1,15 @@
 const canvas = document.getElementById('grid');
 const ctx = canvas.getContext('2d');
+const chartCanvas = document.getElementById('historyChart');
+const chartCtx = chartCanvas.getContext('2d');
 
 const cols = 60;
 const rows = 40;
 const totalCells = cols * rows;
 const cellSize = Math.floor(canvas.width / cols);
 const colors = ['#334155', '#22d3ee', '#f97316', '#a78bfa', '#facc15', '#4ade80'];
+const axisColor = '#94a3b8';
+const lineColors = colors.slice(1, 6);
 
 let grid = createGrid();
 let running = false;
@@ -14,6 +18,7 @@ let selectedColor = 1;
 let stepCount = 0;
 const addedCounts = [0, 0, 0, 0, 0, 0];
 const lifetimeSeen = [new Set(), new Set(), new Set(), new Set(), new Set(), new Set()];
+const stepHistory = [];
 
 const startBtn = document.getElementById('startBtn');
 const stepBtn = document.getElementById('stepBtn');
@@ -38,6 +43,89 @@ function getCellsByColor() {
   }
 
   return counts;
+}
+
+function syncStepHistory() {
+  const currentCounts = getCellsByColor();
+
+  stepHistory[stepCount] = currentCounts;
+  stepHistory.length = stepCount + 1;
+
+  drawHistoryChart();
+}
+
+function drawHistoryChart() {
+  chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+
+  const width = chartCanvas.width;
+  const height = chartCanvas.height;
+  const padding = { top: 20, right: 24, bottom: 40, left: 54 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxStep = Math.max(stepHistory.length - 1, 0);
+  const maxCountInHistory = Math.max(
+    1,
+    ...stepHistory.flatMap((counts) => counts.slice(1, 6)),
+  );
+
+  chartCtx.lineWidth = 1;
+  chartCtx.strokeStyle = axisColor;
+  chartCtx.fillStyle = axisColor;
+  chartCtx.font = '12px Inter, system-ui, sans-serif';
+
+  chartCtx.beginPath();
+  chartCtx.moveTo(padding.left, padding.top);
+  chartCtx.lineTo(padding.left, padding.top + chartHeight);
+  chartCtx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+  chartCtx.stroke();
+
+  const yTicks = 4;
+
+  for (let i = 0; i <= yTicks; i += 1) {
+    const ratio = i / yTicks;
+    const y = padding.top + chartHeight - ratio * chartHeight;
+    const value = Math.round(ratio * maxCountInHistory);
+
+    chartCtx.strokeStyle = 'rgb(71 85 105 / 35%)';
+    chartCtx.beginPath();
+    chartCtx.moveTo(padding.left, y);
+    chartCtx.lineTo(padding.left + chartWidth, y);
+    chartCtx.stroke();
+
+    chartCtx.fillStyle = axisColor;
+    chartCtx.fillText(String(value), 10, y + 4);
+  }
+
+  chartCtx.fillText('0', padding.left - 4, padding.top + chartHeight + 18);
+  chartCtx.fillText(String(maxStep), padding.left + chartWidth - 8, padding.top + chartHeight + 18);
+  chartCtx.fillText('шаги', padding.left + chartWidth - 40, height - 6);
+  chartCtx.save();
+  chartCtx.translate(14, padding.top + 8);
+  chartCtx.rotate(-Math.PI / 2);
+  chartCtx.fillText('клеток на поле', 0, 0);
+  chartCtx.restore();
+
+  lineColors.forEach((lineColor, index) => {
+    const color = index + 1;
+
+    chartCtx.beginPath();
+    chartCtx.lineWidth = 2;
+    chartCtx.strokeStyle = lineColor;
+
+    stepHistory.forEach((counts, step) => {
+      const x = padding.left + (maxStep === 0 ? 0 : (step / maxStep) * chartWidth);
+      const y = padding.top + chartHeight - (counts[color] / maxCountInHistory) * chartHeight;
+
+      if (step === 0) {
+        chartCtx.moveTo(x, y);
+      } else {
+        chartCtx.lineTo(x, y);
+      }
+    });
+
+    chartCtx.stroke();
+  });
 }
 
 function updateLifetimeSeen() {
@@ -145,6 +233,7 @@ function tick() {
   stepCount += 1;
   drawGrid();
   updateLifetimeSeen();
+  syncStepHistory();
   updateStats();
 }
 
@@ -227,6 +316,7 @@ clearBtn.addEventListener('click', () => {
   }
 
   drawGrid();
+  syncStepHistory();
   updateStats();
 });
 
@@ -234,6 +324,7 @@ randomBtn.addEventListener('click', () => {
   addRandomCells(getRandomCount());
   drawGrid();
   updateLifetimeSeen();
+  syncStepHistory();
   updateStats();
 });
 
@@ -274,6 +365,7 @@ canvas.addEventListener('click', (event) => {
 
   drawGrid();
   updateLifetimeSeen();
+  syncStepHistory();
   updateStats();
 });
 
@@ -281,4 +373,5 @@ setSelectedColor(selectedColor);
 randomCountInput.value = String(getRandomCount());
 drawGrid();
 updateLifetimeSeen();
+syncStepHistory();
 updateStats();
