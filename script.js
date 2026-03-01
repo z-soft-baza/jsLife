@@ -103,7 +103,7 @@ function drawHistoryChart() {
   chartCtx.save();
   chartCtx.translate(14, padding.top + 8);
   chartCtx.rotate(-Math.PI / 2);
-  chartCtx.fillText('клеток на поле', 0, 0);
+  chartCtx.fillText('клетки', 0, 0);
   chartCtx.restore();
 
   lineColors.forEach((lineColor, index) => {
