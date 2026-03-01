@@ -1,11 +1,8 @@
 :root {
   color-scheme: dark;
-  --bg: #0f172a;
   --surface: #1e293b;
   --text: #e2e8f0;
   --accent: #38bdf8;
-  --alive: #22d3ee;
-  --dead: #334155;
 }
 
 * {
@@ -42,11 +39,16 @@ h1 {
   color: #cbd5e1;
 }
 
-.controls {
+.controls,
+.palette {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  margin-bottom: 12px;
+}
+
+.palette {
   margin-bottom: 16px;
 }
 
@@ -72,6 +74,40 @@ label {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  padding: 0;
+  border: 2px solid #475569;
+}
+
+.color-btn.active {
+  transform: scale(1.08);
+  border-color: #f8fafc;
+  box-shadow: 0 0 0 2px rgb(148 163 184 / 40%);
+}
+
+.color-btn[data-color='1'] {
+  background: #22d3ee;
+}
+
+.color-btn[data-color='2'] {
+  background: #f97316;
+}
+
+.color-btn[data-color='3'] {
+  background: #a78bfa;
+}
+
+.color-btn[data-color='4'] {
+  background: #facc15;
+}
+
+.color-btn[data-color='5'] {
+  background: #4ade80;
 }
 
 canvas {

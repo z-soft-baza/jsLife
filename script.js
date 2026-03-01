@@ -4,20 +4,29 @@ const ctx = canvas.getContext('2d');
 const cols = 60;
 const rows = 40;
 const cellSize = Math.floor(canvas.width / cols);
+const colors = ['#334155', '#22d3ee', '#f97316', '#a78bfa', '#facc15', '#4ade80'];
 
 let grid = createGrid();
 let running = false;
 let intervalId = null;
+let selectedColor = 1;
 
 const startBtn = document.getElementById('startBtn');
 const stepBtn = document.getElementById('stepBtn');
 const clearBtn = document.getElementById('clearBtn');
 const randomBtn = document.getElementById('randomBtn');
 const speedInput = document.getElementById('speedInput');
+const colorButtons = Array.from(document.querySelectorAll('.color-btn'));
 
 function createGrid(fillRandom = false) {
   return Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => (fillRandom ? (Math.random() > 0.75 ? 1 : 0) : 0)),
+    Array.from({ length: cols }, () => {
+      if (!fillRandom || Math.random() > 0.75) {
+        return 0;
+      }
+
+      return Math.floor(Math.random() * 5) + 1;
+    }),
   );
 }
 
@@ -26,14 +35,14 @@ function drawGrid() {
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
-      ctx.fillStyle = grid[row][col] ? '#22d3ee' : '#334155';
+      ctx.fillStyle = colors[grid[row][col]];
       ctx.fillRect(col * cellSize, row * cellSize, cellSize - 1, cellSize - 1);
     }
   }
 }
 
-function getNeighbors(row, col) {
-  let count = 0;
+function getNeighborsByColor(row, col) {
+  const counts = [0, 0, 0, 0, 0, 0];
 
   for (let dr = -1; dr <= 1; dr += 1) {
     for (let dc = -1; dc <= 1; dc += 1) {
@@ -41,11 +50,28 @@ function getNeighbors(row, col) {
 
       const r = (row + dr + rows) % rows;
       const c = (col + dc + cols) % cols;
-      count += grid[r][c];
+      const color = grid[r][c];
+
+      if (color !== 0) {
+        counts[color] += 1;
+      }
     }
   }
 
-  return count;
+  return counts;
+}
+
+function pickBirthColor(neighborCounts) {
+  let birthColor = 0;
+
+  for (let color = 1; color <= 5; color += 1) {
+    if (neighborCounts[color] === 3) {
+      birthColor = color;
+      break;
+    }
+  }
+
+  return birthColor;
 }
 
 function nextGeneration() {
@@ -53,13 +79,17 @@ function nextGeneration() {
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
-      const alive = grid[row][col] === 1;
-      const neighbors = getNeighbors(row, col);
+      const currentColor = grid[row][col];
+      const neighborsByColor = getNeighborsByColor(row, col);
 
-      if (alive && (neighbors === 2 || neighbors === 3)) {
-        next[row][col] = 1;
-      } else if (!alive && neighbors === 3) {
-        next[row][col] = 1;
+      if (currentColor !== 0) {
+        const ownColorNeighbors = neighborsByColor[currentColor];
+
+        if (ownColorNeighbors === 2 || ownColorNeighbors === 3) {
+          next[row][col] = currentColor;
+        }
+      } else {
+        next[row][col] = pickBirthColor(neighborsByColor);
       }
     }
   }
@@ -89,6 +119,15 @@ function setRunning(nextState) {
   }
 }
 
+function setSelectedColor(color) {
+  selectedColor = color;
+
+  colorButtons.forEach((button) => {
+    const isActive = Number(button.dataset.color) === color;
+    button.classList.toggle('active', isActive);
+  });
+}
+
 startBtn.addEventListener('click', () => {
   setRunning(!running);
 });
@@ -116,6 +155,12 @@ speedInput.addEventListener('input', () => {
   }
 });
 
+colorButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    setSelectedColor(Number(button.dataset.color));
+  });
+});
+
 canvas.addEventListener('click', (event) => {
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -124,8 +169,9 @@ canvas.addEventListener('click', (event) => {
   const col = Math.floor(x / (rect.width / cols));
   const row = Math.floor(y / (rect.height / rows));
 
-  grid[row][col] = grid[row][col] ? 0 : 1;
+  grid[row][col] = grid[row][col] === selectedColor ? 0 : selectedColor;
   drawGrid();
 });
 
+setSelectedColor(selectedColor);
 drawGrid();
