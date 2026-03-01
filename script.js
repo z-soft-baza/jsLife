@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 
 const cols = 60;
 const rows = 40;
+const totalCells = cols * rows;
 const cellSize = Math.floor(canvas.width / cols);
 const colors = ['#334155', '#22d3ee', '#f97316', '#a78bfa', '#facc15', '#4ade80'];
 
@@ -15,19 +16,12 @@ const startBtn = document.getElementById('startBtn');
 const stepBtn = document.getElementById('stepBtn');
 const clearBtn = document.getElementById('clearBtn');
 const randomBtn = document.getElementById('randomBtn');
+const randomCountInput = document.getElementById('randomCountInput');
 const speedInput = document.getElementById('speedInput');
 const colorButtons = Array.from(document.querySelectorAll('.color-btn'));
 
-function createGrid(fillRandom = false) {
-  return Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => {
-      if (!fillRandom || Math.random() > 0.75) {
-        return 0;
-      }
-
-      return Math.floor(Math.random() * 5) + 1;
-    }),
-  );
+function createGrid() {
+  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
 }
 
 function drawGrid() {
@@ -62,16 +56,13 @@ function getNeighborsByColor(row, col) {
 }
 
 function pickBirthColor(neighborCounts) {
-  let birthColor = 0;
-
   for (let color = 1; color <= 5; color += 1) {
     if (neighborCounts[color] === 3) {
-      birthColor = color;
-      break;
+      return color;
     }
   }
 
-  return birthColor;
+  return 0;
 }
 
 function nextGeneration() {
@@ -105,6 +96,37 @@ function tick() {
 function getIntervalMs() {
   const stepsPerSecond = Number(speedInput.value);
   return Math.max(40, Math.floor(1000 / stepsPerSecond));
+}
+
+function getRandomCount() {
+  const rawValue = Number(randomCountInput.value);
+
+  if (!Number.isFinite(rawValue)) {
+    return 1;
+  }
+
+  return Math.max(1, Math.min(totalCells, Math.floor(rawValue)));
+}
+
+function addRandomCells(count) {
+  const emptyCells = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      if (grid[row][col] === 0) {
+        emptyCells.push([row, col]);
+      }
+    }
+  }
+
+  const available = emptyCells.length;
+  const toPlace = Math.min(count, available);
+
+  for (let i = 0; i < toPlace; i += 1) {
+    const randomIndex = Math.floor(Math.random() * emptyCells.length);
+    const [row, col] = emptyCells.splice(randomIndex, 1)[0];
+    grid[row][col] = Math.floor(Math.random() * 5) + 1;
+  }
 }
 
 function setRunning(nextState) {
@@ -144,7 +166,7 @@ clearBtn.addEventListener('click', () => {
 });
 
 randomBtn.addEventListener('click', () => {
-  grid = createGrid(true);
+  addRandomCells(getRandomCount());
   drawGrid();
 });
 
@@ -153,6 +175,10 @@ speedInput.addEventListener('input', () => {
     clearInterval(intervalId);
     intervalId = setInterval(tick, getIntervalMs());
   }
+});
+
+randomCountInput.addEventListener('change', () => {
+  randomCountInput.value = String(getRandomCount());
 });
 
 colorButtons.forEach((button) => {
@@ -174,4 +200,5 @@ canvas.addEventListener('click', (event) => {
 });
 
 setSelectedColor(selectedColor);
+randomCountInput.value = String(getRandomCount());
 drawGrid();

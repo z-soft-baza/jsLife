@@ -76,6 +76,15 @@ label {
   gap: 8px;
 }
 
+input[type='number'] {
+  width: 92px;
+  padding: 6px 8px;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: #0f172a;
+  color: var(--text);
+}
+
 .color-btn {
   width: 28px;
   height: 28px;
