@@ -35,7 +35,55 @@
         <button class="color-btn" data-color="5" aria-label="Цвет 5"></button>
       </section>
 
-      <canvas id="grid" width="720" height="480" aria-label="Поле игры"></canvas>
+      <section class="workspace">
+        <canvas id="grid" width="720" height="480" aria-label="Поле игры"></canvas>
+
+        <aside class="stats" aria-label="Статистика">
+          <h2>Шагов: <span id="stepCount">0</span></h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Показатель</th>
+                <th>Цвет 1</th>
+                <th>Цвет 2</th>
+                <th>Цвет 3</th>
+                <th>Цвет 4</th>
+                <th>Цвет 5</th>
+                <th>Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Добавлено вручную/случайно</th>
+                <td id="added-1">0</td>
+                <td id="added-2">0</td>
+                <td id="added-3">0</td>
+                <td id="added-4">0</td>
+                <td id="added-5">0</td>
+                <td id="added-total">0</td>
+              </tr>
+              <tr>
+                <th scope="row">Сейчас на доске</th>
+                <td id="current-1">0</td>
+                <td id="current-2">0</td>
+                <td id="current-3">0</td>
+                <td id="current-4">0</td>
+                <td id="current-5">0</td>
+                <td id="current-total">0</td>
+              </tr>
+              <tr>
+                <th scope="row">На доске за всё время</th>
+                <td id="lifetime-1">0</td>
+                <td id="lifetime-2">0</td>
+                <td id="lifetime-3">0</td>
+                <td id="lifetime-4">0</td>
+                <td id="lifetime-5">0</td>
+                <td id="lifetime-total">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </aside>
+      </section>
     </main>
 
     <script src="script.js"></script>

@@ -11,6 +11,9 @@ let grid = createGrid();
 let running = false;
 let intervalId = null;
 let selectedColor = 1;
+let stepCount = 0;
+const addedCounts = [0, 0, 0, 0, 0, 0];
+const lifetimeSeen = [new Set(), new Set(), new Set(), new Set(), new Set(), new Set()];
 
 const startBtn = document.getElementById('startBtn');
 const stepBtn = document.getElementById('stepBtn');
@@ -19,6 +22,55 @@ const randomBtn = document.getElementById('randomBtn');
 const randomCountInput = document.getElementById('randomCountInput');
 const speedInput = document.getElementById('speedInput');
 const colorButtons = Array.from(document.querySelectorAll('.color-btn'));
+const stepCountElement = document.getElementById('stepCount');
+
+function getCellsByColor() {
+  const counts = [0, 0, 0, 0, 0, 0];
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const color = grid[row][col];
+
+      if (color !== 0) {
+        counts[color] += 1;
+      }
+    }
+  }
+
+  return counts;
+}
+
+function updateLifetimeSeen() {
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const color = grid[row][col];
+
+      if (color !== 0) {
+        lifetimeSeen[color].add(`${row}-${col}`);
+      }
+    }
+  }
+}
+
+function updateStats() {
+  const currentCounts = getCellsByColor();
+  const addedTotal = addedCounts.slice(1).reduce((sum, count) => sum + count, 0);
+  const currentTotal = currentCounts.slice(1).reduce((sum, count) => sum + count, 0);
+  const lifetimeCounts = lifetimeSeen.map((positions) => positions.size);
+  const lifetimeTotal = lifetimeCounts.slice(1).reduce((sum, count) => sum + count, 0);
+
+  stepCountElement.textContent = String(stepCount);
+
+  for (let color = 1; color <= 5; color += 1) {
+    document.getElementById(`added-${color}`).textContent = String(addedCounts[color]);
+    document.getElementById(`current-${color}`).textContent = String(currentCounts[color]);
+    document.getElementById(`lifetime-${color}`).textContent = String(lifetimeCounts[color]);
+  }
+
+  document.getElementById('added-total').textContent = String(addedTotal);
+  document.getElementById('current-total').textContent = String(currentTotal);
+  document.getElementById('lifetime-total').textContent = String(lifetimeTotal);
+}
 
 function createGrid() {
   return Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
@@ -90,7 +142,10 @@ function nextGeneration() {
 
 function tick() {
   nextGeneration();
+  stepCount += 1;
   drawGrid();
+  updateLifetimeSeen();
+  updateStats();
 }
 
 function getIntervalMs() {
@@ -125,7 +180,9 @@ function addRandomCells(count) {
   for (let i = 0; i < toPlace; i += 1) {
     const randomIndex = Math.floor(Math.random() * emptyCells.length);
     const [row, col] = emptyCells.splice(randomIndex, 1)[0];
-    grid[row][col] = Math.floor(Math.random() * 5) + 1;
+    const color = Math.floor(Math.random() * 5) + 1;
+    grid[row][col] = color;
+    addedCounts[color] += 1;
   }
 }
 
@@ -162,12 +219,22 @@ stepBtn.addEventListener('click', () => {
 
 clearBtn.addEventListener('click', () => {
   grid = createGrid();
+  stepCount = 0;
+
+  for (let color = 1; color <= 5; color += 1) {
+    addedCounts[color] = 0;
+    lifetimeSeen[color].clear();
+  }
+
   drawGrid();
+  updateStats();
 });
 
 randomBtn.addEventListener('click', () => {
   addRandomCells(getRandomCount());
   drawGrid();
+  updateLifetimeSeen();
+  updateStats();
 });
 
 speedInput.addEventListener('input', () => {
@@ -195,10 +262,23 @@ canvas.addEventListener('click', (event) => {
   const col = Math.floor(x / (rect.width / cols));
   const row = Math.floor(y / (rect.height / rows));
 
-  grid[row][col] = grid[row][col] === selectedColor ? 0 : selectedColor;
+  if (grid[row][col] === selectedColor) {
+    grid[row][col] = 0;
+  } else {
+    if (grid[row][col] === 0) {
+      addedCounts[selectedColor] += 1;
+    }
+
+    grid[row][col] = selectedColor;
+  }
+
   drawGrid();
+  updateLifetimeSeen();
+  updateStats();
 });
 
 setSelectedColor(selectedColor);
 randomCountInput.value = String(getRandomCount());
 drawGrid();
+updateLifetimeSeen();
+updateStats();

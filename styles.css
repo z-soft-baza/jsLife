@@ -119,6 +119,44 @@ input[type='number'] {
   background: #4ade80;
 }
 
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.stats {
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 10px;
+  background: #0b1220;
+  overflow-x: auto;
+}
+
+.stats h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.stats table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.stats th,
+.stats td {
+  border: 1px solid #334155;
+  padding: 6px;
+  text-align: center;
+}
+
+.stats th:first-child {
+  text-align: left;
+}
+
 canvas {
   width: 100%;
   height: auto;
@@ -126,4 +164,10 @@ canvas {
   border-radius: 8px;
   image-rendering: pixelated;
   background: #0b1220;
+}
+
+@media (max-width: 1050px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
 }
