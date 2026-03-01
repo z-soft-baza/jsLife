@@ -20,7 +20,7 @@ body {
 }
 
 .app {
-  width: min(95vw, 840px);
+  /*width: min(95vw, 840px);*/
   background: color-mix(in srgb, var(--surface) 88%, black);
   border: 1px solid #334155;
   border-radius: 16px;
