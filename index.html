@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Игра Жизнь</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>Игра «Жизнь»</h1>
+      <p class="subtitle">Выберите цвет, кликните по клеткам и запустите симуляцию.</p>
+
+      <section class="controls">
+        <button id="startBtn">Старт</button>
+        <button id="stepBtn">Шаг</button>
+        <button id="clearBtn">Очистить</button>
+        <button id="randomBtn">Случайно</button>
+        <label>
+          Скорость
+          <input id="speedInput" type="range" min="2" max="20" value="8" />
+        </label>
+      </section>
+
+      <section class="palette" aria-label="Выбор цвета клетки">
+        <span>Цвет:</span>
+        <button class="color-btn active" data-color="1" aria-label="Цвет 1"></button>
+        <button class="color-btn" data-color="2" aria-label="Цвет 2"></button>
+        <button class="color-btn" data-color="3" aria-label="Цвет 3"></button>
+        <button class="color-btn" data-color="4" aria-label="Цвет 4"></button>
+        <button class="color-btn" data-color="5" aria-label="Цвет 5"></button>
+      </section>
+
+      <canvas id="grid" width="720" height="480" aria-label="Поле игры"></canvas>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
