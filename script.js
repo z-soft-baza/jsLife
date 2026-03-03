@@ -3,8 +3,8 @@ const ctx = canvas.getContext('2d');
 const chartCanvas = document.getElementById('historyChart');
 const chartCtx = chartCanvas.getContext('2d');
 
-const cols = 60;
-const rows = 40;
+const cols = 80;
+const rows = 60;
 const totalCells = cols * rows;
 const cellSize = Math.floor(canvas.width / cols);
 const colors = ['#334155', '#22d3ee', '#f97316', '#a78bfa', '#facc15', '#4ade80'];
