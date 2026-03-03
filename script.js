@@ -63,10 +63,13 @@ function drawHistoryChart() {
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
-  const maxStep = Math.max(stepHistory.length - 1, 0);
+  const historyWindow = 50;
+  const startIndex = Math.max(0, stepHistory.length - historyWindow);
+  const displayedHistory = stepHistory.slice(startIndex);
+  const maxStep = Math.max(displayedHistory.length - 1, 0);
   const maxCountInHistory = Math.max(
     1,
-    ...stepHistory.flatMap((counts) => counts.slice(1, 6)),
+    ...displayedHistory.flatMap((counts) => counts.slice(1, 6)),
   );
 
   chartCtx.lineWidth = 1;
@@ -98,7 +101,7 @@ function drawHistoryChart() {
   }
 
   chartCtx.fillText('0', padding.left - 4, padding.top + chartHeight + 18);
-  chartCtx.fillText(String(maxStep), padding.left + chartWidth - 8, padding.top + chartHeight + 18);
+  chartCtx.fillText(String(stepCount), padding.left + chartWidth - 8, padding.top + chartHeight + 18);
   chartCtx.fillText('шаги', padding.left + chartWidth - 40, height - 6);
   chartCtx.save();
   chartCtx.translate(14, padding.top + 8);
@@ -113,7 +116,7 @@ function drawHistoryChart() {
     chartCtx.lineWidth = 2;
     chartCtx.strokeStyle = lineColor;
 
-    stepHistory.forEach((counts, step) => {
+    displayedHistory.forEach((counts, step) => {
       const x = padding.left + (maxStep === 0 ? 0 : (step / maxStep) * chartWidth);
       const y = padding.top + chartHeight - (counts[color] / maxCountInHistory) * chartHeight;
 
